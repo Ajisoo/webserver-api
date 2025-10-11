@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.ajisoo.backend.service.LightService;
 import xyz.ajisoo.backend.service.SadBotService;
-import xyz.ajisoo.backend.type.rest.LightStatus;
-import xyz.ajisoo.backend.type.rest.Status;
+import xyz.ajisoo.backend.type.rest.admin.LightStatus;
+import xyz.ajisoo.backend.type.rest.admin.SetLightRequest;
+import xyz.ajisoo.backend.type.rest.admin.StatusResponse;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -20,15 +21,15 @@ public class AdminController {
     SadBotService sadBotService;
 
     @GetMapping("/")
-    public ResponseEntity<Status> getStatus() {
-        Status status = new Status();
+    public ResponseEntity<StatusResponse> getStatus() {
+        StatusResponse status = new StatusResponse();
         status.setLights(lightService.getAllLights());
         status.setSadBotOnline(sadBotService.isOnline());
         return ResponseEntity.ok(status);
     }
 
     @PostMapping("/light")
-    public ResponseEntity<LightStatus> setLight(@RequestParam("name") String name, @RequestParam("on") boolean on) {
-        return ResponseEntity.ok(lightService.setLight(name, on));
+    public ResponseEntity<LightStatus> setLight(@RequestBody SetLightRequest setLightRequest) {
+        return ResponseEntity.ok(lightService.setLight(setLightRequest.getName(), setLightRequest.isSetOn()));
     }
 }

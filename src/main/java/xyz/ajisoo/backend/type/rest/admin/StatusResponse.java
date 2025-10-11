@@ -1,17 +1,18 @@
-package xyz.ajisoo.backend.type.rest;
+package xyz.ajisoo.backend.type.rest.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LightStatus {
+public class StatusResponse {
 
-    String name;
-    boolean on;
-    String error;
+    List<LightStatus> lights;
+    boolean sadBotOnline;
 }
