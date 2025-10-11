@@ -12,7 +12,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/schedule")
-public class ScheduleEndpoint {
+public class ScheduleController {
 
     @Autowired
     ScheduleService scheduleService;
