@@ -33,4 +33,9 @@ public class Schedule {
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAvailability> availabilities;
+
+    public static Schedule generateNew() {
+        Schedule schedule = new Schedule();
+
+    }
 }
