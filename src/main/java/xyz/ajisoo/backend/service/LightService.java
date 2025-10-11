@@ -1,6 +1,7 @@
 package xyz.ajisoo.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import xyz.ajisoo.backend.type.rest.LightStatus;
 import xyz.ajisoo.backend.util.LightInterface;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@PreAuthorize("isAuthenticated()")
 public class LightService {
 
     @Autowired

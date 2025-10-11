@@ -11,7 +11,7 @@ import xyz.ajisoo.backend.type.rest.Status;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/admin")
-public class AdminEndpoint {
+public class AdminController {
 
     @Autowired
     LightService lightService;
