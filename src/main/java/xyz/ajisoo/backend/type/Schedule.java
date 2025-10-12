@@ -35,7 +35,6 @@ public class Schedule {
     private List<UserAvailability> availabilities;
 
     public static Schedule generateNew() {
-        Schedule schedule = new Schedule();
-
+        return new Schedule();
     }
 }
