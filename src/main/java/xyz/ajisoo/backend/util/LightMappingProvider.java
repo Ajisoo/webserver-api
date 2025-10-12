@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 public class LightMappingProvider {
 
-    @Value("lights.file")
+    @Value("${lights.file}")
     public String fileLocation;
 
     private Map<String, String> lightMapping;
