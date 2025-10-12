@@ -57,6 +57,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
+        // 1.1. Try again with auth header if not in cookies
+        if (jwt == null) {
+            final String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+            }
+        }
+
         // If no token is found, continue to the next filter
         if (jwt == null) {
             filterChain.doFilter(request, response);
