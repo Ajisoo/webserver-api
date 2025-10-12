@@ -75,7 +75,7 @@ public class AuthController {
 
         } catch (JwtException e) {
             // This catches invalid signature, malformed token, expired token, etc.
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Refresh Token", e);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Refresh Token", e);
         }
     }
 
