@@ -17,7 +17,7 @@ public class ScheduleController {
     @Autowired
     ScheduleService scheduleService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<String>> getAllSchedules() {
         List<String> clientIds = scheduleService.getAllSchedules();
         return ResponseEntity.ok(clientIds);

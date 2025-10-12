@@ -32,7 +32,7 @@ public class AuthController {
     @Value("${otp.path}")
     private String OTP_FILE_PATH;
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<FirstTimeAuthResponse> authenticate(@RequestBody FirstTimeAuthRequest firstTimeAuthRequest) {
         try {
             validateOtp(firstTimeAuthRequest.getOtp());

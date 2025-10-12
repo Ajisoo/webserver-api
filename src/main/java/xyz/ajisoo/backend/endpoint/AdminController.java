@@ -20,7 +20,7 @@ public class AdminController {
     @Autowired
     SadBotService sadBotService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<StatusResponse> getStatus() {
         StatusResponse status = new StatusResponse();
         status.setLights(lightService.getAllLights());
