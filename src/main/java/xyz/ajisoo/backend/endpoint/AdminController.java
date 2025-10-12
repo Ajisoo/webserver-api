@@ -9,7 +9,6 @@ import xyz.ajisoo.backend.type.rest.admin.LightStatus;
 import xyz.ajisoo.backend.type.rest.admin.SetLightRequest;
 import xyz.ajisoo.backend.type.rest.admin.StatusResponse;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
