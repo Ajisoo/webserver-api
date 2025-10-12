@@ -1,5 +1,6 @@
 package xyz.ajisoo.backend.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -16,10 +17,15 @@ import xyz.ajisoo.backend.filter.JwtAuthFilter;
 
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity // This is crucial for enabling method-level annotations like @PreAuthorize
 public class SecurityConfig {
+
+    @Value("${cors.origin}")
+    String origin;
 
     private final JwtAuthFilter jwtAuthFilter;
 
@@ -30,6 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(withDefaults())
                 // Disable CSRF since we are using stateless JWTs
                 .csrf(AbstractHttpConfigurer::disable)
                 // Define authorization rules
@@ -51,8 +58,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Specify the origin of your frontend application
-        configuration.setAllowedOrigins(List.of("https://ajisoo.xyz"));
-        configuration.setAllowedOrigins(List.of("localhost:3000"));
+        configuration.setAllowedOrigins(List.of(origin));
         // Specify the allowed HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Specify the allowed headers

@@ -25,6 +25,9 @@ import java.time.Instant;
 @RequestMapping("/auth")
 public class AuthController {
 
+    @Value("${cookie.verification}")
+    boolean verify;
+
     @Autowired
     private JwtService jwtService;
 
@@ -77,6 +80,9 @@ public class AuthController {
     }
 
     private void validateOtp(String submittedOtp) throws IOException, NoSuchAlgorithmException {
+        if (!verify) {
+            return;
+        }
         if (!Files.exists(Path.of(OTP_FILE_PATH))) {
             throw new SecurityException("Invalid OTP.");
         }

@@ -2,6 +2,7 @@ package xyz.ajisoo.backend.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,6 +20,10 @@ public class LightMappingProvider {
 
     public Map<String, String> getLightMapping() {
         if (lightMapping == null) {
+            if (StringUtils.isEmpty(fileLocation)) {
+                lightMapping = new HashMap<>();
+                return lightMapping;
+            }
             lightMapping = new HashMap<>();
             try (BufferedReader br = new BufferedReader(new FileReader(fileLocation))) {
                 String line;
