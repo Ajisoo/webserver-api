@@ -44,10 +44,9 @@ public class LightService {
         }
     }
     public boolean setAllLights(boolean on) {
-        LightStatus lastStatus = null;
         List<Thread> threads = new ArrayList<>();
-        for (String name : lightMappingProvider.getLightMapping().keySet()) {
-            threads.add(new Thread(() -> lightInterface.setLight(name, on)));
+        for (String host : lightMappingProvider.getLightMapping().values()) {
+            threads.add(new Thread(() -> lightInterface.setLight(host, on)));
         }
         for (Thread thread : threads) {
             thread.start();
