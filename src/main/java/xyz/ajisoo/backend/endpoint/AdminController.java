@@ -31,4 +31,9 @@ public class AdminController {
     public ResponseEntity<LightStatus> setLight(@RequestBody SetLightRequest setLightRequest) {
         return ResponseEntity.ok(lightService.setLight(setLightRequest.getName(), setLightRequest.isSetOn()));
     }
+
+    @PostMapping("/lights")
+    public ResponseEntity<Boolean> setLight(@RequestParam boolean on) {
+        return ResponseEntity.ok(lightService.setAllLights(on));
+    }
 }

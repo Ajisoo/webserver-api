@@ -43,4 +43,22 @@ public class LightService {
             return new LightStatus(name, false, e.getMessage());
         }
     }
+    public boolean setAllLights(boolean on) {
+        LightStatus lastStatus = null;
+        List<Thread> threads = new ArrayList<>();
+        for (String name : lightMappingProvider.getLightMapping().keySet()) {
+            threads.add(new Thread(() -> lightInterface.setLight(name, on)));
+        }
+        for (Thread thread : threads) {
+            thread.start();
+        }
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return true;
+    }
 }
