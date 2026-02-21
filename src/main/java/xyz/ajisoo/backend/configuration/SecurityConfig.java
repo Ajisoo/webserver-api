@@ -47,7 +47,9 @@ public class SecurityConfig {
                 // Define authorization rules
                 .authorizeHttpRequests(auth -> auth
                         // Allow public access to authentication endpoints
-                        .requestMatchers("/admin/**").authenticated()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/stream/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/sadbot/**").hasAuthority("ROLE_SADBOT")
                         // Require authentication for all other requests
                         .anyRequest().permitAll()
                 )

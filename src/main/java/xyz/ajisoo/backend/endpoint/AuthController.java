@@ -1,6 +1,8 @@
 package xyz.ajisoo.backend.endpoint;
 
 import io.jsonwebtoken.JwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,14 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    public static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @Value("${cookie.verification}")
     boolean verify;
@@ -37,11 +43,11 @@ public class AuthController {
     @PostMapping
     public ResponseEntity<FirstTimeAuthResponse> authenticate(@RequestBody FirstTimeAuthRequest firstTimeAuthRequest) {
         try {
-            validateOtp(firstTimeAuthRequest.getOtp());
+            List<String> roles = validateOtpAndGetRoles(firstTimeAuthRequest.getOtp());
 
             // If validation is successful, generate the token
             String subject = "user-authenticated-via-otp-" + Instant.now().toEpochMilli();
-            String refreshToken = jwtService.generateRefreshToken(subject);
+            String refreshToken = jwtService.generateRefreshToken(subject, roles);
 
             // Invalidate the OTP by deleting the file
             Files.deleteIfExists(Path.of(OTP_FILE_PATH));
@@ -64,12 +70,13 @@ public class AuthController {
         try {
             // Validate the refresh token and extract the subject
             String subject = jwtService.extractSubject(requestRefreshToken);
+            List<String> roles = jwtService.extractRoles(requestRefreshToken);
 
             // Generate a new access token
-            String newAccessToken = jwtService.generateAccessToken(subject);
+            String newAccessToken = jwtService.generateAccessToken(subject, roles);
 
             // Generate a new refresh token to slide the session window
-            String newRefreshToken = jwtService.generateRefreshToken(subject);
+            String newRefreshToken = jwtService.generateRefreshToken(subject, roles);
 
             return ResponseEntity.ok(new TokenRefreshResponse(newAccessToken, newRefreshToken));
 
@@ -79,9 +86,9 @@ public class AuthController {
         }
     }
 
-    private void validateOtp(String submittedOtp) throws IOException, NoSuchAlgorithmException {
+    private List<String> validateOtpAndGetRoles(String submittedOtp) throws IOException, NoSuchAlgorithmException {
         if (!verify) {
-            return;
+            return Collections.emptyList();
         }
         if (!Files.exists(Path.of(OTP_FILE_PATH))) {
             throw new SecurityException("Invalid OTP.");
@@ -89,12 +96,13 @@ public class AuthController {
 
         String storedData = new String(Files.readAllBytes(Path.of(OTP_FILE_PATH)));
         String[] parts = storedData.trim().split(":");
-        if (parts.length != 2) {
+        if (parts.length != 3) {
             throw new SecurityException("Malformed OTP data.");
         }
 
         String storedHash = parts[0];
         long expirationTs = Long.parseLong(parts[1]);
+        String rolesString = parts[2];
 
         // 1. Check if expired
         if (Instant.now().getEpochSecond() > expirationTs) {
@@ -106,6 +114,8 @@ public class AuthController {
         if (!MessageDigest.isEqual(storedHash.getBytes(), submittedHash.getBytes())) {
             throw new SecurityException("Invalid OTP.");
         }
+
+        return Arrays.asList(rolesString.split(","));
     }
 
     private String hashSha256(String input) throws NoSuchAlgorithmException {

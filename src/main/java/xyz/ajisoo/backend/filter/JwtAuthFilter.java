@@ -9,7 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -17,7 +20,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import xyz.ajisoo.backend.service.JwtService;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -74,6 +80,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 2. Validate the token
         try {
             final String subject = jwtService.extractSubject(jwt);
+            final List<String> roles = jwtService.extractRoles(jwt);
+            String type = jwtService.extractClaim(jwt, c -> c.get("type", String.class));
+
+            if (!"ACCESS".equals(type)) {
+                throw new InsufficientAuthenticationException("Refresh token used as access token");
+            }
+
+            Collection<GrantedAuthority> authorities =
+                    roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
 
             // If token is valid, set the authentication in the security context
             if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -81,7 +98,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         subject,
                         null,
-                        Collections.emptyList() // No specific roles/authorities needed for now
+                        authorities
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

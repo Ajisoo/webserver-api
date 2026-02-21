@@ -1,21 +1,38 @@
 package xyz.ajisoo.backend.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(JwtService.class);
+
+    public enum TokenType {
+        REFRESH,
+        ACCESS;
+    }
+
+    @Value("${roles.admin}")
+    private List<String> roles_for_admin;
 
     @Value("${cookie.verification}")
     private boolean verify;
@@ -31,21 +48,23 @@ public class JwtService {
 
     private String loadedSecret;
 
-    public String generateAccessToken(String subject) {
-        return generateToken(subject, accessTokenValidity);
+    public String generateAccessToken(String subject, List<String> roles) {
+        return generateToken(subject, TokenType.ACCESS, accessTokenValidity, roles);
     }
 
-    public String generateRefreshToken(String subject) {
-        return generateToken(subject, refreshTokenValidity);
+    public String generateRefreshToken(String subject, List<String> roles) {
+        return generateToken(subject, TokenType.REFRESH, refreshTokenValidity, roles);
     }
 
-    private String generateToken(String subject, long validity) {
+    private String generateToken(String subject, TokenType tokenType, long validity, List<String> roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + validity);
 
         return Jwts.builder()
                 .setSubject(subject)
                 .setIssuedAt(now)
+                .claim("type", tokenType.name())
+                .claim("roles", roles)
                 .setExpiration(expiryDate)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
@@ -56,6 +75,29 @@ public class JwtService {
             return "bypass-subject";
         }
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> {
+            Object roles = claims.get("roles");
+
+            if (roles == null) {
+                return Collections.emptyList();
+            }
+
+            if (roles instanceof List<?>) {
+                if (((List<?>) roles).contains("ROLE_ADMIN")) {
+                    roles = roles_for_admin;
+                }
+                return ((List<?>) roles).stream()
+                        .filter(Objects::nonNull)
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+            }
+
+            // Defensive fallback (should never happen)
+            return Collections.emptyList();
+        });
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

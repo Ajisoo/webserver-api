@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("hasRole('ADMIN')")
 public class LightService {
 
     @Autowired
