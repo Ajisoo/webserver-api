@@ -1,4 +1,4 @@
-package xyz.ajisoo.backend.type;
+package xyz.ajisoo.backend.type.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

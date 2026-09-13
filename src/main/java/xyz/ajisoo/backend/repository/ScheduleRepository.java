@@ -1,7 +1,7 @@
 package xyz.ajisoo.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import xyz.ajisoo.backend.type.Schedule;
+import xyz.ajisoo.backend.type.entity.Schedule;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 

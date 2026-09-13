@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.ajisoo.backend.service.ScheduleService;
-import xyz.ajisoo.backend.type.Schedule;
+import xyz.ajisoo.backend.type.entity.Schedule;
 
 import java.util.List;
 import java.util.UUID;
